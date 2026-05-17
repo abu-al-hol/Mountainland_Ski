@@ -38,11 +38,11 @@ while still feeling like a real-world enterprise dataset.
 
 # 🌐 Fake Brand Website
 
-The synthetic brand website for Summit Ridge:
+The synthetic brand website for Mountainland Ski Company:
 
 👉 https://mountainlandskico.github.io/retail/
 
-Built by Darin.
+Built by Darin Lewis, Instructor, Mountainland Technical College.
 
 ---
 
@@ -309,10 +309,14 @@ Created by:
 
 **Jacob Jarrard**  
 Mountainland Technical College  
+Data Technologies Program Lead
 Category Insights / Analytics Engineering
 
 Additional collaboration:
-- Darin (Summit Ridge website)
+**Darin Lewis**
+Mountainland Technical College
+Evening Instructor
+Big Data / AI 
 
 ---
 
