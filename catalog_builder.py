@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import random
+import os
 from datetime import datetime, timedelta
 
 DB_NAME = "ski_catalog.db"
@@ -756,7 +757,7 @@ def get_discount(calendar_row):
 
     return discount_pct, promo_flag, markdown_flag
 
-def generate_weekly_sales(max_rows=1500000):
+def generate_weekly_sales(target_rows=1000000):
     conn = connect_db()
     cursor = conn.cursor()
 
@@ -770,135 +771,112 @@ def generate_weekly_sales(max_rows=1500000):
         conn.close()
         return 0
 
-    rows_inserted = 0
-
     sku_records = skus.to_dict("records")
     store_records = stores.to_dict("records")
     calendar_records = calendar.to_dict("records")
 
+    total_weeks = len(calendar_records)
+    rows_per_week = max(1, target_rows // total_weeks)
+
+    rows_inserted = 0
     insert_rows = []
 
     for week in calendar_records:
-        for store in store_records:
+        weekly_rows_inserted = 0
+        attempts = 0
+        max_attempts = rows_per_week * 30
 
-            # online stores carry more long-tail assortment
+        while weekly_rows_inserted < rows_per_week and attempts < max_attempts:
+            attempts += 1
+
+            store = random.choice(store_records)
+            sku = random.choice(sku_records)
+
+            category = sku["category"]
+            price_tier = sku["price_tier"]
+
+            season_multiplier = get_category_season_multiplier(category, week["retail_season"])
+            snow_factor = store["snow_market_score"] / 75
+
             if store["is_online"] == 1:
-                sample_rate = 0.10
-            elif store["retailer_tier"] == "Large Retail":
-                sample_rate = 0.045
+                store_factor = 2.25
             elif store["retailer_tier"] == "Specialty Retail":
-                sample_rate = 0.06
+                store_factor = 1.20
+            elif store["retailer_tier"] == "Small Retail":
+                store_factor = 0.75
             else:
-                sample_rate = 0.035
+                store_factor = 1.0
 
-            weekly_sku_sample = random.sample(
-                sku_records,
-                max(1, int(len(sku_records) * sample_rate))
-            )
+            base_velocity = get_base_velocity(category, price_tier)
+            expected_units = base_velocity * season_multiplier * snow_factor * store_factor
 
-            for sku in weekly_sku_sample:
-                category = sku["category"]
-                price_tier = sku["price_tier"]
+            if week["is_black_friday_week"] == 1:
+                expected_units *= random.uniform(1.6, 2.8)
 
-                season_multiplier = get_category_season_multiplier(
-                    category,
-                    week["retail_season"]
-                )
+            if week["is_christmas_week"] == 1 and category in ["Accessories", "Gloves", "Base Layers", "Jackets"]:
+                expected_units *= random.uniform(1.3, 2.0)
 
-                snow_factor = store["snow_market_score"] / 75
+            expected_units *= random.uniform(0.15, 2.00)
+            units_sold = int(round(expected_units))
 
-                if store["is_online"] == 1:
-                    store_factor = 1.25
-                elif store["retailer_tier"] == "Specialty Retail":
-                    store_factor = 1.15
-                elif store["retailer_tier"] == "Small Retail":
-                    store_factor = 0.75
-                else:
-                    store_factor = 1.0
+            if units_sold <= 0:
+                continue
 
-                base_velocity = get_base_velocity(category, price_tier)
+            baseline_price = float(sku["baseline_price"] or sku["msrp"] or 0)
+            unit_cost = float(sku["unit_cost"] or 0)
 
-                expected_units = base_velocity * season_multiplier * snow_factor * store_factor
+            discount_pct, promo_flag, markdown_flag = get_discount(week)
 
-                # extra lift for holidays
-                if week["is_black_friday_week"] == 1:
-                    expected_units *= random.uniform(1.6, 2.8)
+            selling_price = baseline_price * (1 - discount_pct)
+            gross_sales = baseline_price * units_sold
+            net_sales = selling_price * units_sold
+            cogs = unit_cost * units_sold
+            gross_profit = net_sales - cogs
 
-                if week["is_christmas_week"] == 1 and category in ["Accessories", "Gloves", "Base Layers", "Jackets"]:
-                    expected_units *= random.uniform(1.3, 2.0)
+            units_returned = 0
+            if random.random() < 0.025:
+                units_returned = random.randint(1, max(1, min(units_sold, 2)))
 
-                # random noise
-                expected_units *= random.uniform(0.25, 1.85)
+            inventory_on_hand = random.randint(0, 40)
+            stockout_flag = 1 if inventory_on_hand <= 2 and units_sold >= 3 else 0
 
-                units_sold = int(round(expected_units))
+            insert_rows.append((
+                week["week_start_date"],
+                store["store_id"],
+                sku["sku_id"],
+                units_sold,
+                baseline_price,
+                discount_pct,
+                selling_price,
+                gross_sales,
+                net_sales,
+                unit_cost,
+                cogs,
+                gross_profit,
+                inventory_on_hand,
+                units_returned,
+                promo_flag,
+                markdown_flag,
+                stockout_flag,
+            ))
 
-                # keep sparsity: if no meaningful sale, skip row
-                if units_sold <= 0:
-                    continue
+            rows_inserted += 1
+            weekly_rows_inserted += 1
 
-                baseline_price = float(sku["baseline_price"] or sku["msrp"] or 0)
-                unit_cost = float(sku["unit_cost"] or 0)
+            if len(insert_rows) >= 10000:
+                cursor.executemany("""
+                    INSERT INTO fact_weekly_sales (
+                        week_start_date, store_id, sku_id, units_sold,
+                        baseline_price, discount_pct, selling_price,
+                        gross_sales, net_sales, unit_cost, cogs,
+                        gross_profit, inventory_on_hand, units_returned,
+                        promo_flag, markdown_flag, stockout_flag
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, insert_rows)
 
-                discount_pct, promo_flag, markdown_flag = get_discount(week)
-
-                selling_price = baseline_price * (1 - discount_pct)
-                gross_sales = baseline_price * units_sold
-                net_sales = selling_price * units_sold
-                cogs = unit_cost * units_sold
-                gross_profit = net_sales - cogs
-
-                units_returned = 0
-                if random.random() < 0.025:
-                    units_returned = random.randint(1, max(1, min(units_sold, 2)))
-
-                inventory_on_hand = random.randint(0, 40)
-                stockout_flag = 1 if inventory_on_hand <= 2 and units_sold >= 3 else 0
-
-                insert_rows.append((
-                    week["week_start_date"],
-                    store["store_id"],
-                    sku["sku_id"],
-                    units_sold,
-                    baseline_price,
-                    discount_pct,
-                    selling_price,
-                    gross_sales,
-                    net_sales,
-                    unit_cost,
-                    cogs,
-                    gross_profit,
-                    inventory_on_hand,
-                    units_returned,
-                    promo_flag,
-                    markdown_flag,
-                    stockout_flag,
-                ))
-
-                rows_inserted += 1
-
-                if len(insert_rows) >= 10000:
-                    cursor.executemany("""
-                        INSERT INTO fact_weekly_sales (
-                            week_start_date, store_id, sku_id, units_sold,
-                            baseline_price, discount_pct, selling_price,
-                            gross_sales, net_sales, unit_cost, cogs,
-                            gross_profit, inventory_on_hand, units_returned,
-                            promo_flag, markdown_flag, stockout_flag
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, insert_rows)
-
-                    conn.commit()
-                    insert_rows = []
-
-                if rows_inserted >= max_rows:
-                    break
-
-            if rows_inserted >= max_rows:
-                break
-
-        if rows_inserted >= max_rows:
-            break
+                conn.commit()
+                insert_rows = []
 
     if insert_rows:
         cursor.executemany("""
@@ -969,6 +947,30 @@ def load_weekly_sales_summary():
     conn.close()
     return summary, by_year, by_category
 
+def export_tables_to_csv():
+    export_folder = "exports"
+    os.makedirs(export_folder, exist_ok=True)
+
+    conn = connect_db()
+
+    tables = [
+        "skus",
+        "stores",
+        "calendar_weeks",
+        "fact_weekly_sales"
+    ]
+
+    exported_files = []
+
+    for table in tables:
+        df = pd.read_sql_query(f"SELECT * FROM {table}", conn)
+        output_path = os.path.join(export_folder, f"{table}.csv")
+        df.to_csv(output_path, index=False)
+        exported_files.append(output_path)
+
+    conn.close()
+    return exported_files
+
 st.divider()
 
 st.header("Generate Weekly Sales Fact Table")
@@ -982,7 +984,7 @@ max_sales_rows = st.number_input(
 )
 
 if st.button("Generate Weekly Sales"):
-    rows_created = generate_weekly_sales(max_rows=int(max_sales_rows))
+    rows_created = generate_weekly_sales(target_rows=int(max_sales_rows))
     st.success(f"Weekly sales fact table generated with {rows_created:,} rows.")
 
 sales_summary, sales_by_year, sales_by_category = load_weekly_sales_summary()
@@ -1005,3 +1007,15 @@ if not sales_summary.empty and sales_summary["row_count"].iloc[0] > 0:
 else:
     st.info("No weekly sales generated yet.")
 
+st.divider()
+
+st.header("Export Tables to CSV")
+
+if st.button("Export CSV Files"):
+    exported_files = export_tables_to_csv()
+
+    st.success("CSV export completed.")
+
+    st.subheader("Exported Files")
+    for file in exported_files:
+        st.write(file)
