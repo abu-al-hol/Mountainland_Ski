@@ -315,6 +315,7 @@ Category Insights / Analytics Engineering
 Additional collaboration:
 
 **Darin Lewis**
+
 Mountainland Technical College
 Evening Instructor
 Big Data / AI 
