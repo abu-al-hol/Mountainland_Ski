@@ -2,9 +2,9 @@
 
 > A synthetic retail analytics ecosystem built with Python, Streamlit, SQLite, SQL, and BigQuery-inspired cloud data concepts. The dataset is designed to simulate a realistic blend of retail sales and syndicated market data, giving students exposure to the types of analytical environments they are likely to encounter in industry.
 
-Most students begin by learning foundational tools and techniques in analytics, databases, programming, and visualization. But when they enter the workforce, they are suddenly confronted with massive datasets, cloud platforms, complex business logic, and entirely new domains to understand. This project is designed to help bridge that gap.
+> Most students begin by learning foundational tools and techniques in analytics, databases, programming, and visualization. But when they enter the workforce, they are suddenly confronted with massive datasets, cloud platforms, complex business logic, and entirely new domains to understand. This project is designed to help bridge that gap.
 
-At Mountainland Technical College, students spend nine months learning modern data technologies before completing a capstone project that integrates the full range of skills taught in the program. Projects like this one are intended to simulate real-world analytical ecosystems and provide hands-on experience with the workflows, tools, and problem-solving approaches that are critical for success in data and analytics careers.
+> At Mountainland Technical College, students spend nine months learning modern data technologies before completing a capstone project that integrates the full range of skills taught in the program. Projects like this one are intended to simulate real-world analytical ecosystems and provide hands-on experience with the workflows, tools, and problem-solving approaches that are critical for success in data and analytics careers.
 
 Created for:
 - Mountainland Technical College students
