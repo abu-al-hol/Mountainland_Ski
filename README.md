@@ -1,6 +1,6 @@
 # Mountainland Ski Retail Analytics Warehouse
 
-> A synthetic retail analytics ecosystem built with Python, Streamlit, SQLite, SQL, and BigQuery concepts. The data created is a generally realistic amalgamation of market data and sales data. If they wanted to grow data and business acumen, companies like Circana/IRI & Nielsen would make sample market data available to students. In an absence of data, only simulation remains.
+> A synthetic retail analytics ecosystem built with Python, Streamlit, SQLite, SQL, and BigQuery concepts. The data created is a generally realistic amalgamation of market data and sales data. All students of data technologies and analysis learn the basics, and one day they land a job and suddenly they are confronted with massive databases, expansive cloud infrastructure, and a whirlwind of new business and domain issues to learn. At Mountainland Tech we teach 9 months of technologies and then students are expected to make a capstone project, not unlike this one, that draws on all skills we teach here and are critical for success in data oriented careers.
 
 Created for:
 - Mountainland Technical College students
