@@ -1,6 +1,6 @@
 # Mountainland Ski Retail Analytics Warehouse
 
-> A synthetic retail analytics ecosystem built with Python, Streamlit, SQLite, SQL, and BigQuery concepts.
+> A synthetic retail analytics ecosystem built with Python, Streamlit, SQLite, SQL, and BigQuery concepts. The data created is a generally realistic amalgamation of market data and sales data. If they wanted to grow data and business acumen, companies like Circana/IRI & Nielsen would make sample market data available to students. In an absence of data, only simulation remains.
 
 Created for:
 - Mountainland Technical College students
@@ -192,7 +192,7 @@ Typical generated warehouse:
 # 🚀 Running the Project
 
 This project was developed primarily in **PyCharm** using Python and Streamlit.
-
+https://streamlit.io/
 ---
 
 # ⚙️ Installation
@@ -248,7 +248,9 @@ http://localhost:8501
 # 🧠 Typical Workflow
 
 ## 1. Add Product Families
-Create products manually through the Streamlit UI.
+Create products manually through the Streamlit UI. 
+
+(I did this for ~144 product families; adding colors and sizes got me to generate over 4200 skus.)
 
 ## 2. Generate SKUs
 Creates realistic size/color assortment.
