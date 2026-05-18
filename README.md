@@ -1,6 +1,10 @@
 # Mountainland Ski Retail Analytics Warehouse
 
-> A synthetic retail analytics ecosystem built with Python, Streamlit, SQLite, SQL, and BigQuery concepts. The data created is a generally realistic amalgamation of market data and sales data. All students of data technologies and analysis learn the basics, and one day they land a job and suddenly they are confronted with massive databases, expansive cloud infrastructure, and a whirlwind of new business and domain issues to learn. At Mountainland Tech we teach 9 months of technologies and then students are expected to make a capstone project, not unlike this one, that draws on all skills we teach here and are critical for success in data oriented careers.
+> A synthetic retail analytics ecosystem built with Python, Streamlit, SQLite, SQL, and BigQuery-inspired cloud data concepts. The dataset is designed to simulate a realistic blend of retail sales and syndicated market data, giving students exposure to the types of analytical environments they are likely to encounter in industry.
+
+Most students begin by learning foundational tools and techniques in analytics, databases, programming, and visualization. But when they enter the workforce, they are suddenly confronted with massive datasets, cloud platforms, complex business logic, and entirely new domains to understand. This project is designed to help bridge that gap.
+
+At Mountainland Technical College, students spend nine months learning modern data technologies before completing a capstone project that integrates the full range of skills taught in the program. Projects like this one are intended to simulate real-world analytical ecosystems and provide hands-on experience with the workflows, tools, and problem-solving approaches that are critical for success in data and analytics careers.
 
 Created for:
 - Mountainland Technical College students
