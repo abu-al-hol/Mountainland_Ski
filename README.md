@@ -69,7 +69,7 @@ Retail network including:
 - REI
 - Dick's Sporting Goods
 - Scheels
-- Evo
+- Evo (*Where I buy all my ski stuff and the source from where most product names and descriptions were copied.)
 - independent mountain shops
 - DTC online channels
 
